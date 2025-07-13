@@ -360,6 +360,26 @@ class _stimp:
         """
         return self._M.astype(np.int64)
 
+    @property
+    def P_(self):
+        """
+        Get all of the raw (i.e., non-transformed) matrix profiles matrix profile in
+        (breadth first searched (level) ordered)
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+        """
+        P = []
+        for i, idx in enumerate(self._bfs_indices):
+            P.append(self._PAN[idx][: len(self._T) - self._M[i] + 1])
+
+        return P
+
     # @property
     # def bfs_indices_(self):
     #     """
