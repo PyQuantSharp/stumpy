@@ -8,12 +8,22 @@ from packaging.specifiers import SpecifierSet
 from packaging.version import Version
 
 
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+}
+
+
 def get_min_python_version():
     """
     Find the minimum version of Python supported (i.e., not end-of-life)
     """
     min_python = (
-        pd.read_html("https://devguide.python.org/versions/")[0].iloc[-1].Branch
+        pd.read_html(
+            "https://devguide.python.org/versions/",
+            storage_options=HEADERS,
+        )[0]
+        .iloc[-1]
+        .Branch
     )
     return min_python
 
@@ -25,7 +35,8 @@ def get_min_numba_numpy_version(min_python):
     """
     df = (
         pd.read_html(
-            "https://numba.readthedocs.io/en/stable/user/installing.html#version-support-information"  # noqa
+            "https://numba.readthedocs.io/en/stable/user/installing.html#version-support-information",  # noqa
+            storage_options=HEADERS,
         )[0]
         .dropna()
         .drop(columns=["Numba.1", "llvmlite", "LLVM", "TBB"])
@@ -81,12 +92,14 @@ def get_min_scipy_version(min_python, min_numpy):
     Determine the SciPy version compatibility
     """
     colnames = pd.read_html(
-        "https://docs.scipy.org/doc/scipy/dev/toolchain.html#numpy"
+        "https://docs.scipy.org/doc/scipy/dev/toolchain.html#numpy",
+        storage_options=HEADERS,
     )[1].columns
     converter = {colname: str for colname in colnames}
     df = (
         pd.read_html(
             "https://docs.scipy.org/doc/scipy/dev/toolchain.html#numpy",
+            storage_options=HEADERS,
             converters=converter,
         )[1]
         .rename(columns=lambda x: x.replace(" ", "_"))
