@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
 import argparse
-from urllib import request
 import re
+from urllib import request
 
 import pandas as pd
 from packaging.specifiers import SpecifierSet
@@ -169,19 +169,7 @@ def get_min_scipy_version(min_python, min_numpy):
 
 def get_minor_versions_between(start_version_str, end_version_str):
     """
-    Returns a list of all minor Python versions between two specified minor versions.
-    Assumes semantic versioning (MAJOR.MINOR.PATCH) and only considers minor versions
-    within the same major version.
-
-    Args:
-        start_version_str (str): The starting version string (e.g., "3.6.0").
-        end_version_str (str): The ending version string (e.g., "3.9.5").
-
-    Returns:
-        list: A list of strings representing the minor versions in between,
-              including the start and end minor versions if they are distinct.
-              Returns an empty list if the start version is greater than or equal
-              to the end version, or if major versions differ.
+    Returns a list of all minor Python versions between two specified minor versions
     """
     try:
         start_parts = [int(x) for x in start_version_str.split(".")]
@@ -201,7 +189,8 @@ def get_minor_versions_between(start_version_str, end_version_str):
 
     if start_minor >= end_minor:
         print(
-            "Warning: Start minor version is not less than end minor version. Returning an empty list."
+            "Warning: Start minor version is not less than end minor version."
+            "Returning an empty list."
         )
         return []
 
@@ -213,6 +202,9 @@ def get_minor_versions_between(start_version_str, end_version_str):
 
 
 def get_latest_numpy_version():
+    """
+    Retrieve the latest NumPy version
+    """
     url = "https://pypi.org/project/numpy/"
     req = request.Request(url, data=None, headers=HEADERS)
     html = request.urlopen(req).read().decode("utf-8")
@@ -221,6 +213,9 @@ def get_latest_numpy_version():
 
 
 def check_python_version(row):
+    """
+    Ensure that the Python version is compatible with Numba and SciPy
+    """
     versions = get_minor_versions_between(
         row.START_PYTHON_VERSION, row.END_PYTHON_VERSION
     )
@@ -233,6 +228,9 @@ def check_python_version(row):
 
 
 def check_numpy_version(row):
+    """
+    Ensure that the NumPy version is compatible with the NumPy Specs
+    """
     if row.NUMPY in row.NUMPY_SPEC:
         return row.NUMPY
     else:
