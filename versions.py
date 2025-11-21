@@ -381,6 +381,9 @@ def test_pkg_mismatch_regex():
 
 
 def get_all_min_versions(MIN_PYTHON):
+    """
+    Retrieve all minimum Python and package versions
+    """
     MIN_NUMBA, MIN_NUMPY = get_min_numba_numpy_version(MIN_PYTHON)
     MIN_SCIPY = get_min_scipy_version(MIN_PYTHON, MIN_NUMPY)
 
