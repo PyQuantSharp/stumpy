@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import argparse
+from urllib import request
 import re
 
 import pandas as pd
@@ -88,16 +89,16 @@ def check_scipy_compatibility(row, min_python, min_numpy):
     return python_compatible & numpy_compatible
 
 
-def get_min_scipy_version(min_python, min_numpy):
+def get_scipy_version_df():
     """
-    Determine the SciPy version compatibility
+    Retrieve raw SciPy version table as DataFrame
     """
     colnames = pd.read_html(
         "https://docs.scipy.org/doc/scipy/dev/toolchain.html#numpy",
         storage_options=HEADERS,
     )[1].columns
     converter = {colname: str for colname in colnames}
-    df = (
+    return (
         pd.read_html(
             "https://docs.scipy.org/doc/scipy/dev/toolchain.html#numpy",
             storage_options=HEADERS,
@@ -105,6 +106,15 @@ def get_min_scipy_version(min_python, min_numpy):
         )[1]
         .rename(columns=lambda x: x.replace(" ", "_"))
         .replace({".x": ""}, regex=True)
+    )
+
+
+def get_min_scipy_version(min_python, min_numpy):
+    """
+    Determine the SciPy version compatibility
+    """
+    df = (
+        get_scipy_version_df()
         .pipe(
             lambda df: df.assign(
                 SciPy_version=df.SciPy_version.str.replace(
@@ -155,6 +165,168 @@ def get_min_scipy_version(min_python, min_numpy):
         .iloc[-1]
     )
     return df.SciPy_version
+
+
+def get_minor_versions_between(start_version_str, end_version_str):
+    """
+    Returns a list of all minor Python versions between two specified minor versions.
+    Assumes semantic versioning (MAJOR.MINOR.PATCH) and only considers minor versions
+    within the same major version.
+
+    Args:
+        start_version_str (str): The starting version string (e.g., "3.6.0").
+        end_version_str (str): The ending version string (e.g., "3.9.5").
+
+    Returns:
+        list: A list of strings representing the minor versions in between,
+              including the start and end minor versions if they are distinct.
+              Returns an empty list if the start version is greater than or equal
+              to the end version, or if major versions differ.
+    """
+    try:
+        start_parts = [int(x) for x in start_version_str.split('.')]
+        end_parts = [int(x) for x in end_version_str.split('.')]
+    except ValueError:
+        raise ValueError("Invalid version string format. Expected 'MAJOR.MINOR.PATCH'.")
+
+    if len(start_parts) < 2 or len(end_parts) < 2:
+        raise ValueError("Version string must include at least major and minor parts.")
+
+    start_major, start_minor = start_parts[0], start_parts[1]
+    end_major, end_minor = end_parts[0], end_parts[1]
+
+    if start_major != end_major:
+        print("Warning: Major versions differ. Returning an empty list.")
+        return []
+
+    if start_minor >= end_minor:
+        print("Warning: Start minor version is not less than end minor version. Returning an empty list.")
+        return []
+
+    versions = []
+    for minor in range(start_minor, end_minor + 1):
+        versions.append(f"{start_major}.{minor}")
+
+    return versions
+
+
+def get_latest_numpy_version():
+    url = "https://pypi.org/project/numpy/"
+    req = request.Request(
+            url,
+            data=None,
+            headers=HEADERS
+        )
+    html = request.urlopen(req).read().decode("utf-8")
+    match = re.search(r'numpy (\d+\.\d+\.\d+)', html, re.DOTALL)
+    return match.groups()[0]
+
+
+def check_python_version(row):
+    versions = get_minor_versions_between(row.START_PYTHON_VERSION, row.END_PYTHON_VERSION)
+
+    compatible_version = None
+    for version in versions:
+        if Version(version) in row.NUMBA_PYTHON_SPEC & row.SCIPY_PYTHON_SPEC:
+            compatible_version = version
+    return compatible_version
+
+def check_numpy_version(row):
+    if row.NUMPY in row.NUMPY_SPEC:
+        return row.NUMPY
+    else:
+        return None
+
+
+def get_all_max_versions():
+    """
+    Find the maximum version of Python that is compatible with Numba and NumPy
+    """
+    df = (
+        pd.read_html(
+            "https://numba.readthedocs.io/en/stable/user/installing.html#version-support-information",  # noqa
+            storage_options=HEADERS,
+        )[0]
+        .dropna()
+        .drop(columns=["Numba.1", "llvmlite", "LLVM", "TBB"])
+        .query('`Python`.str.contains("2.7") == False')
+        .query('`Numba`.str.contains(".x") == False')
+        .query('`Numba`.str.contains("{") == False')
+        .pipe(
+            lambda df: df.assign(
+                START_PYTHON_VERSION=(
+                    df.Python.str.split().str[0].replace({".x": ""}, regex=True)
+                )
+            )
+        )
+        .pipe(
+            lambda df: df.assign(
+                END_PYTHON_VERSION=(
+                    df.Python.str.split().str[4].replace({".x": ""}, regex=True)
+                )
+            )
+        )
+        .pipe(
+            lambda df: df.assign(
+                NUMBA_PYTHON_SPEC=(
+                    df.Python.str.split().str[1].replace({"<": ">"}, regex=True)
+                    + df.Python.str.split().str[0].replace({".x": ""}, regex=True)
+                    + ", "
+                    + df.Python.str.split().str[3]
+                    + df.Python.str.split().str[4].replace({".x": ""}, regex=True)
+                ).apply(SpecifierSet)
+            )
+        )
+        .assign(
+            NUMPY = get_latest_numpy_version()
+        )
+        .pipe(
+            lambda df: df.assign(
+                NUMPY_SPEC=(
+                    df.NumPy
+                    .str.replace(r' [;†\.]$', '', regex=True)
+                    .str.split().str[-2:].replace({".x": ""}, regex=True)
+                    .str.join('')
+                ).apply(SpecifierSet)
+            )
+        )
+        .assign(
+            NUMPY=lambda row: row.apply(
+                check_numpy_version, axis=1
+            )
+        )
+        .assign(
+            SCIPY = get_scipy_version_df().iloc[0].SciPy_version
+        )
+        .assign(
+            SCIPY_PYTHON_SPEC = get_scipy_version_df().iloc[0].Python_versions
+        )
+        .pipe(
+            lambda df:
+                df.assign(
+                    SCIPY_PYTHON_SPEC = df.SCIPY_PYTHON_SPEC.apply(SpecifierSet)
+            )
+        )
+        .assign(
+            MAX_PYTHON=lambda row: row.apply(
+                check_python_version, axis=1
+            )
+        )
+        .pipe(lambda df: df.assign(MAJOR=df.MAX_PYTHON.str.split(".").str[0]))
+        .pipe(lambda df: df.assign(MINOR=df.MAX_PYTHON.str.split(".").str[1]))
+        .sort_values(["MAJOR", "MINOR"], ascending=[False, False])
+        .iloc[0]
+    )
+
+    print(
+        f"python: {df.MAX_PYTHON}\n"
+        f"numba: {df.Numba}\n"
+        f"numpy: {df.NUMPY}\n"
+        f"scipy: {df.SCIPY}"
+    )
+
+
+
 
 
 def match_pkg_version(line, pkg_name):
@@ -226,15 +398,7 @@ def test_pkg_mismatch_regex():
             raise ValueError(f'Package mismatch regex fails to cover/match "{line}"')
 
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("min_python", nargs="?", default=None)
-    args = parser.parse_args()
-
-    if args.min_python is not None:
-        MIN_PYTHON = str(args.min_python)
-    else:
-        MIN_PYTHON = get_min_python_version()
+def get_all_min_versions(MIN_PYTHON):
     MIN_NUMBA, MIN_NUMPY = get_min_numba_numpy_version(MIN_PYTHON)
     MIN_SCIPY = get_min_scipy_version(MIN_PYTHON, MIN_NUMPY)
 
@@ -271,3 +435,29 @@ if __name__ == "__main__":
                 f"{pkg_name} {pkg_version} Mismatch: Version {version} "
                 f"found in {fname}:{line_num}"
             )
+
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-mode", type=str, default='min', help='Options: ["min", "max"]')
+    parser.add_argument("python_version", nargs="?", default=None)
+    args = parser.parse_args()
+    # Example
+    # ./versions.py
+    # ./versions.py 3.11
+    # ./versions.py -mode max
+
+    print(f'mode: {args.mode}')
+
+    if args.mode == 'min':
+        if args.python_version is not None:
+            MIN_PYTHON = str(args.python_version)
+        else:
+            MIN_PYTHON = get_min_python_version()
+        get_all_min_versions(MIN_PYTHON)
+    elif args.mode == 'max':
+        get_all_max_versions()
+    else:
+        raise ValueError(f'Unrecognized mode: "{args.mode}"')
+    
