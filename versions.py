@@ -184,8 +184,8 @@ def get_minor_versions_between(start_version_str, end_version_str):
               to the end version, or if major versions differ.
     """
     try:
-        start_parts = [int(x) for x in start_version_str.split('.')]
-        end_parts = [int(x) for x in end_version_str.split('.')]
+        start_parts = [int(x) for x in start_version_str.split(".")]
+        end_parts = [int(x) for x in end_version_str.split(".")]
     except ValueError:
         raise ValueError("Invalid version string format. Expected 'MAJOR.MINOR.PATCH'.")
 
@@ -200,7 +200,9 @@ def get_minor_versions_between(start_version_str, end_version_str):
         return []
 
     if start_minor >= end_minor:
-        print("Warning: Start minor version is not less than end minor version. Returning an empty list.")
+        print(
+            "Warning: Start minor version is not less than end minor version. Returning an empty list."
+        )
         return []
 
     versions = []
@@ -212,24 +214,23 @@ def get_minor_versions_between(start_version_str, end_version_str):
 
 def get_latest_numpy_version():
     url = "https://pypi.org/project/numpy/"
-    req = request.Request(
-            url,
-            data=None,
-            headers=HEADERS
-        )
+    req = request.Request(url, data=None, headers=HEADERS)
     html = request.urlopen(req).read().decode("utf-8")
-    match = re.search(r'numpy (\d+\.\d+\.\d+)', html, re.DOTALL)
+    match = re.search(r"numpy (\d+\.\d+\.\d+)", html, re.DOTALL)
     return match.groups()[0]
 
 
 def check_python_version(row):
-    versions = get_minor_versions_between(row.START_PYTHON_VERSION, row.END_PYTHON_VERSION)
+    versions = get_minor_versions_between(
+        row.START_PYTHON_VERSION, row.END_PYTHON_VERSION
+    )
 
     compatible_version = None
     for version in versions:
         if Version(version) in row.NUMBA_PYTHON_SPEC & row.SCIPY_PYTHON_SPEC:
             compatible_version = version
     return compatible_version
+
 
 def check_numpy_version(row):
     if row.NUMPY in row.NUMPY_SPEC:
@@ -277,41 +278,27 @@ def get_all_max_versions():
                 ).apply(SpecifierSet)
             )
         )
-        .assign(
-            NUMPY = get_latest_numpy_version()
-        )
+        .assign(NUMPY=get_latest_numpy_version())
         .pipe(
             lambda df: df.assign(
                 NUMPY_SPEC=(
-                    df.NumPy
-                    .str.replace(r' [;†\.]$', '', regex=True)
-                    .str.split().str[-2:].replace({".x": ""}, regex=True)
-                    .str.join('')
+                    df.NumPy.str.replace(r" [;†\.]$", "", regex=True)
+                    .str.split()
+                    .str[-2:]
+                    .replace({".x": ""}, regex=True)
+                    .str.join("")
                 ).apply(SpecifierSet)
             )
         )
-        .assign(
-            NUMPY=lambda row: row.apply(
-                check_numpy_version, axis=1
-            )
-        )
-        .assign(
-            SCIPY = get_scipy_version_df().iloc[0].SciPy_version
-        )
-        .assign(
-            SCIPY_PYTHON_SPEC = get_scipy_version_df().iloc[0].Python_versions
-        )
+        .assign(NUMPY=lambda row: row.apply(check_numpy_version, axis=1))
+        .assign(SCIPY=get_scipy_version_df().iloc[0].SciPy_version)
+        .assign(SCIPY_PYTHON_SPEC=get_scipy_version_df().iloc[0].Python_versions)
         .pipe(
-            lambda df:
-                df.assign(
-                    SCIPY_PYTHON_SPEC = df.SCIPY_PYTHON_SPEC.apply(SpecifierSet)
+            lambda df: df.assign(
+                SCIPY_PYTHON_SPEC=df.SCIPY_PYTHON_SPEC.apply(SpecifierSet)
             )
         )
-        .assign(
-            MAX_PYTHON=lambda row: row.apply(
-                check_python_version, axis=1
-            )
-        )
+        .assign(MAX_PYTHON=lambda row: row.apply(check_python_version, axis=1))
         .pipe(lambda df: df.assign(MAJOR=df.MAX_PYTHON.str.split(".").str[0]))
         .pipe(lambda df: df.assign(MINOR=df.MAX_PYTHON.str.split(".").str[1]))
         .sort_values(["MAJOR", "MINOR"], ascending=[False, False])
@@ -324,9 +311,6 @@ def get_all_max_versions():
         f"numpy: {df.NUMPY}\n"
         f"scipy: {df.SCIPY}"
     )
-
-
-
 
 
 def match_pkg_version(line, pkg_name):
@@ -437,10 +421,11 @@ def get_all_min_versions(MIN_PYTHON):
             )
 
 
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("-mode", type=str, default='min', help='Options: ["min", "max"]')
+    parser.add_argument(
+        "-mode", type=str, default="min", help='Options: ["min", "max"]'
+    )
     parser.add_argument("python_version", nargs="?", default=None)
     args = parser.parse_args()
     # Example
@@ -448,16 +433,15 @@ if __name__ == "__main__":
     # ./versions.py 3.11
     # ./versions.py -mode max
 
-    print(f'mode: {args.mode}')
+    print(f"mode: {args.mode}")
 
-    if args.mode == 'min':
+    if args.mode == "min":
         if args.python_version is not None:
             MIN_PYTHON = str(args.python_version)
         else:
             MIN_PYTHON = get_min_python_version()
         get_all_min_versions(MIN_PYTHON)
-    elif args.mode == 'max':
+    elif args.mode == "max":
         get_all_max_versions()
     else:
         raise ValueError(f'Unrecognized mode: "{args.mode}"')
-    
