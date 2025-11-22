@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import argparse
+import json
 import re
 from urllib import request
 
@@ -15,18 +16,36 @@ HEADERS = {
 }
 
 
-def get_min_python_version():
+def get_all_python_versions():
     """
-    Find the minimum version of Python supported (i.e., not end-of-life)
+    Retrieve all supported Python versions (i.e., not end-of-life)
     """
-    min_python = (
+    python_versions = (
         pd.read_html(
             "https://devguide.python.org/versions/",
             storage_options=HEADERS,
         )[0]
-        .iloc[-1]
-        .Branch
+        .query('Branch != "main"')
+        .Branch.to_list()
     )
+    return python_versions
+
+
+def get_all_python_versions_in_range(start, stop):
+    """
+    Find all Python minor versions within some start/stop range (inclusive)
+    """
+    python_versions = get_all_python_versions()[::-1]  # Reverse order
+    start_idx = python_versions.index(start)
+    stop_idx = python_versions.index(stop)
+    print(json.dumps(python_versions[start_idx : stop_idx + 1]))
+
+
+def get_min_python_version():
+    """
+    Find the minimum version of Python supported (i.e., not end-of-life)
+    """
+    min_python = get_all_python_versions()[-1]
     return min_python
 
 
@@ -425,18 +444,22 @@ def get_all_min_versions(MIN_PYTHON):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "-mode", type=str, default="min", help='Options: ["min", "max"]'
+        "-mode", type=str, default="min", help='Options: ["min", "max", "range"]'
     )
-    parser.add_argument("python_version", nargs="?", default=None)
+    parser.add_argument("python_version", nargs="*", default=None)
     args = parser.parse_args()
     # Example
     # ./versions.py
     # ./versions.py 3.11
     # ./versions.py -mode max
-
-    print(f"mode: {args.mode}")
+    # /versions.py -mode range 3.10 3.14
 
     if args.mode == "min":
+        if len(args.python_version) == 0:
+            args.python_version = None
+        elif len(args.python_version) == 1:
+            args.python_version = args.python_version[0]
+
         if args.python_version is not None:
             MIN_PYTHON = str(args.python_version)
         else:
@@ -444,5 +467,9 @@ if __name__ == "__main__":
         get_all_min_versions(MIN_PYTHON)
     elif args.mode == "max":
         get_all_max_versions()
+    elif args.mode == "range":
+        start = args.python_version[0]
+        stop = args.python_version[1]
+        get_all_python_versions_in_range(start, stop)
     else:
         raise ValueError(f'Unrecognized mode: "{args.mode}"')
