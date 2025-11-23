@@ -19,6 +19,8 @@ HEADERS = {
 def get_all_python_versions():
     """
     Retrieve all supported Python versions (i.e., not end-of-life)
+
+    Note that all versions are returned in descending order
     """
     python_versions = (
         pd.read_html(
@@ -39,6 +41,14 @@ def get_all_python_versions_in_range(start, stop):
     start_idx = python_versions.index(start)
     stop_idx = python_versions.index(stop)
     print(json.dumps(python_versions[start_idx : stop_idx + 1]))
+
+
+def get_safe_python_version():
+    """
+    Retrieve the n-2 Python release version
+    """
+    python_versions = get_all_python_versions()[::-1]  # Reverse order
+    print(python_versions[-3])
 
 
 def get_min_python_version():
@@ -442,7 +452,10 @@ def get_all_min_versions(MIN_PYTHON):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "-mode", type=str, default="min", help='Options: ["min", "max", "range"]'
+        "-mode",
+        type=str,
+        default="min",
+        help='Options: ["min", "max", "range", "safe"]',
     )
     parser.add_argument("python_version", nargs="*", default=None)
     args = parser.parse_args()
@@ -469,5 +482,7 @@ if __name__ == "__main__":
         start = args.python_version[0]
         stop = args.python_version[1]
         get_all_python_versions_in_range(start, stop)
+    elif args.mode == "safe":
+        get_safe_python_version()
     else:
         raise ValueError(f'Unrecognized mode: "{args.mode}"')
