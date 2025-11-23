@@ -224,11 +224,9 @@ def get_latest_numpy_version():
     """
     Retrieve the latest NumPy version
     """
-    url = "https://pypi.org/project/numpy/"
-    req = request.Request(url, data=None, headers=HEADERS)
-    html = request.urlopen(req).read().decode("utf-8")
-    match = re.search(r"numpy (\d+\.\d+\.\d+)", html, re.DOTALL)
-    return match.groups()[0]
+    url = f'https://pypi.python.org/pypi/numpy/json'
+    releases = json.loads(request.urlopen(url).read())['releases']
+    return list(releases.keys())[-1]
 
 
 def check_python_version(row):
