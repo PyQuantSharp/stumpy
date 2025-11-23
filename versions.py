@@ -224,8 +224,8 @@ def get_latest_numpy_version():
     """
     Retrieve the latest NumPy version
     """
-    url = f'https://pypi.python.org/pypi/numpy/json'
-    releases = json.loads(request.urlopen(url).read())['releases']
+    url = "https://pypi.python.org/pypi/numpy/json"
+    releases = json.loads(request.urlopen(url).read())["releases"]
     return list(releases.keys())[-1]
 
 
