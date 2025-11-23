@@ -295,7 +295,8 @@ check_links()
     echo "Checking notebook links"
     export JUPYTER_PLATFORM_DIRS=1
     jupyter --paths
-    pytest --check-links docs/Tutorial_*.ipynb notebooks/Tutorial_*.ipynb docs/*.md docs/*.rst  ./*.md ./*.rst
+    pytest --check-links docs/Tutorial_*.ipynb notebooks/Tutorial_*.ipynb docs/*.md docs/*.rst  ./*.md ./*.rst --check-links-ignore "https://dl.acm.org/doi/10.1145/3357223.3362721"
+    check_errs $?
 }
 
 count()
