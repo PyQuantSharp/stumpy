@@ -25,7 +25,7 @@ jobs:
           MIN_PYTHON=$(python ./versions.py -mode min | grep python | awk '{print $2}')
           MAX_PYTHON=$(python ./versions.py -mode max | grep python | awk '{print $2}')
           echo "python_versions=$(python ./versions.py -mode range $MIN_PYTHON $MAX_PYTHON)" >> $GITHUB_OUTPUT
-          echo 'min_python_version="$MIN_PYTHON"' >> $GITHUB_OUTPUT
+          echo "min_python_version=\"$MIN_PYTHON\"" >> $GITHUB_OUTPUT
         shell: bash
   minimum-version-testing:
     needs: generate_python_matrix
@@ -33,13 +33,12 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ${{ fromJSON(needs.generate_python_matrix.outputs.min_python_version) }}
     steps:
       - uses: actions/checkout@v4
       - name: Set Up Python
         uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: ${{ fromJSON(needs.generate_python_matrix.outputs.min_python_version) }}
       - name: Display Python Version
         run: python -c "import sys; print(sys.version)"
         shell: bash
