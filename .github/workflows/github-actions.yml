@@ -25,7 +25,7 @@ jobs:
           MIN_PYTHON=$(python ./versions.py -mode min | grep python | awk '{print $2}')
           MAX_PYTHON=$(python ./versions.py -mode max | grep python | awk '{print $2}')
           echo "python_versions=$(python ./versions.py -mode range $MIN_PYTHON $MAX_PYTHON)" >> $GITHUB_OUTPUT
-          echo "min_python_version=$($MIN_PYTHON)" >> $GITHUB_OUTPUT
+          echo "min_python_version=$MIN_PYTHON" >> $GITHUB_OUTPUT
         shell: bash
   minimum-version-testing:
     needs: generate_python_matrix
