@@ -28,7 +28,7 @@ jobs:
           echo "min_python_version=$($MIN_PYTHON)" >> $GITHUB_OUTPUT
         shell: bash
   minimum-version-testing:
-    needs: generate_python_matrix:
+    needs: generate_python_matrix
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
