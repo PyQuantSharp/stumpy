@@ -455,7 +455,7 @@ if __name__ == "__main__":
         "-mode",
         type=str,
         default="min",
-        help='Options: ["min", "max", "range", "safe"]',
+        help='Options: ["min", "max", "range", "safe", "latest"]',
     )
     parser.add_argument("python_version", nargs="*", default=None)
     args = parser.parse_args()
@@ -484,5 +484,7 @@ if __name__ == "__main__":
         get_all_python_versions_in_range(start, stop)
     elif args.mode == "safe":
         get_safe_python_version()
+    elif args.mode == "latest":
+        print(get_all_python_versions()[0])
     else:
         raise ValueError(f'Unrecognized mode: "{args.mode}"')
