@@ -4,6 +4,9 @@ on:
     branches: main
   pull_request:
     branches: main
+  workflow_dispatch:
+  schedule:
+    - cron: '0 14 * * *'  # 2pm UTC == 9am EST
 jobs:
   generate_python_matrix:
     runs-on: ubuntu-latest
