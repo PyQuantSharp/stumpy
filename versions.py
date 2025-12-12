@@ -479,6 +479,8 @@ if __name__ == "__main__":
     elif args.mode == "max":
         get_all_max_versions()
     elif args.mode == "range":
+        if len(args.python_version) <= 2:
+            raise IndexError("Please provide both a start and stop version")
         start = args.python_version[0]
         stop = args.python_version[1]
         get_all_python_versions_in_range(start, stop)
