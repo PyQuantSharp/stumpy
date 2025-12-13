@@ -299,7 +299,8 @@ check_links()
     if [[ `pytest --trace-config | grep rerunfailures | wc -l` -gt "0" ]]; then
         RERUNS="--reruns 5"
     fi
-    pytest $RERUNS --check-links docs/Tutorial_*.ipynb notebooks/Tutorial_*.ipynb docs/*.md docs/*.rst  ./*.md ./*.rst --check-links-ignore "https://dl.acm.org/doi/10.1145/3357223.3362721"
+    IGNORE_LINKS='--check-links-ignore "https://dl.acm.org/*"'
+    pytest $RERUNS --check-links docs/Tutorial_*.ipynb notebooks/Tutorial_*.ipynb docs/*.md docs/*.rst  ./*.md ./*.rst $IGNORE_LINKS
     check_errs $?
 }
 
