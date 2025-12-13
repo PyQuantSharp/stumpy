@@ -236,7 +236,8 @@ def get_latest_numpy_version():
     """
     url = "https://pypi.python.org/pypi/numpy/json"
     releases = json.loads(request.urlopen(url).read())["releases"]
-    return list(releases.keys())[-1]
+    releases = [version for version in releases.keys() if "rc" not in version]
+    return releases[-1]
 
 
 def check_python_version(row):
