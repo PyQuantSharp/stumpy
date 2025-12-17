@@ -231,18 +231,27 @@ def get_minor_versions_between(start_version_str, end_version_str):
 
 
 def _get_scipy_pypi():
+    """
+    Retrieve the SciPy PyPI JSON file
+    """
     url = "https://pypi.org/project/scipy/"
     req = request.Request(url, data=None, headers=HEADERS)
     return request.urlopen(req).read().decode("utf-8")
 
 
 def get_latest_scipy_version():
+    """
+    Retrieve the latest SciPy Version
+    """
     html = _get_scipy_pypi()
     match = re.search(r"scipy\s+(\d+\.\d+\.\d+)", html, re.DOTALL)
     return match.groups()[0]
 
 
 def get_latest_scipy_python_version():
+    """
+    Retrieve the latest Python version that is supported by SciPy
+    """
     html = _get_scipy_pypi()
     python_versions = list(
         set(re.findall(r"Python\s+\:\:\s+(\d+\.\d+)", html, re.DOTALL))
