@@ -232,23 +232,21 @@ def get_minor_versions_between(start_version_str, end_version_str):
 
 def _get_scipy_pypi():
     url = "https://pypi.org/project/scipy/"
-    req = request.Request(
-        url,
-        data=None,
-        headers=HEADERS
-    )
+    req = request.Request(url, data=None, headers=HEADERS)
     return request.urlopen(req).read().decode("utf-8")
 
 
 def get_latest_scipy_version():
     html = _get_scipy_pypi()
-    match = re.search(r'scipy\s+(\d+\.\d+\.\d+)', html, re.DOTALL)
+    match = re.search(r"scipy\s+(\d+\.\d+\.\d+)", html, re.DOTALL)
     return match.groups()[0]
 
 
 def get_latest_scipy_python_version():
     html = _get_scipy_pypi()
-    python_versions = list(set(re.findall(r'Python\s+\:\:\s+(\d+\.\d+)', html, re.DOTALL)))
+    python_versions = list(
+        set(re.findall(r"Python\s+\:\:\s+(\d+\.\d+)", html, re.DOTALL))
+    )
     python_version = sorted(python_versions, key=Version)[-1]
     return f"<={python_version}"
 
