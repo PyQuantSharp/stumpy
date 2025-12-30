@@ -230,44 +230,48 @@ def get_minor_versions_between(start_version_str, end_version_str):
     return versions
 
 
-def _get_scipy_pypi():
-    """
-    Retrieve the SciPy PyPI JSON file
-    """
-    url = "https://pypi.org/project/scipy/"
-    req = request.Request(url, data=None, headers=HEADERS)
-    return request.urlopen(req).read().decode("utf-8")
-
-
 def get_latest_scipy_version():
     """
-    Retrieve the latest SciPy Version
+    Reteive the latest SciPy version
     """
-    html = _get_scipy_pypi()
-    match = re.search(r"scipy\s+(\d+\.\d+\.\d+)", html, re.DOTALL)
-    return match.groups()[0]
+    print(_get_all_pkg_versions("scipy")[-1])
+    return _get_all_pkg_versions("scipy")[-1]
 
 
 def get_latest_scipy_python_version():
     """
     Retrieve the latest Python version that is supported by SciPy
     """
-    html = _get_scipy_pypi()
-    python_versions = list(
-        set(re.findall(r"Python\s+\:\:\s+(\d+\.\d+)", html, re.DOTALL))
-    )
+    python_versions = []
+    response = _get_pypi_json("scipy")
+    for classifier in response.get("info").get("classifiers"):
+        if "Python" in classifier:
+            match = re.search(r"Python\s+\:\:\s+(\d+\.\d+)", classifier)
+            if match is not None:
+                python_versions.append(match.groups()[0])
     python_version = sorted(python_versions, key=Version)[-1]
     return f"<={python_version}"
 
 
-def get_latest_numpy_version():
+def _get_pypi_json(pkg):
+    url = f"https://pypi.python.org/pypi/{pkg}/json"
+    response = json.loads(request.urlopen(url).read())
+    return response
+
+
+def _get_all_pkg_versions(pkg):
+    response = _get_pypi_json(pkg)
+    all_versions = response["releases"]
+    all_versions = [version for version in all_versions.keys() if "rc" not in version]
+    all_versions = sorted(all_versions, key=Version)
+    return all_versions
+
+
+def get_latest_numpy_versions(n=10):
     """
-    Retrieve the latest NumPy version
+    Retrieve the n latest NumPy versions
     """
-    url = "https://pypi.python.org/pypi/numpy/json"
-    releases = json.loads(request.urlopen(url).read())["releases"]
-    releases = [version for version in releases.keys() if "rc" not in version]
-    return releases[-1]
+    return _get_all_pkg_versions("numpy")[-n:]
 
 
 def check_python_version(row):
@@ -289,10 +293,11 @@ def check_numpy_version(row):
     """
     Ensure that the NumPy version is compatible with the NumPy Specs
     """
-    if row.NUMPY in row.NUMPY_SPEC:
-        return row.NUMPY
-    else:
-        return None
+    out = None
+    for numpy_version in row.NUMPY:
+        if numpy_version in row.NUMPY_SPEC:
+            out = numpy_version
+    return out
 
 
 def get_all_max_versions():
@@ -334,7 +339,11 @@ def get_all_max_versions():
                 ).apply(SpecifierSet)
             )
         )
-        .assign(NUMPY=get_latest_numpy_version())
+        .pipe(
+            lambda df: df.assign(
+                NUMPY=([get_latest_numpy_versions() for i in df.index])
+            )
+        )
         .pipe(
             lambda df: df.assign(
                 NUMPY_SPEC=(
