@@ -3738,11 +3738,10 @@ def check_ignore_trivial(T_A, T_B, ignore_trivial):
 
     T_B : numpy.ndarray
         The time series or sequence that will be used to annotate T_A. For every
-        subsequence in T_A, its nearest neighbor in T_B will be recorded. Default is
-        `None` which corresponds to a self-join.
+        subsequence in T_A, its nearest neighbor in T_B will be recorded.
 
     ignore_trivial : bool
-        Set to `True` if this is a self-join. Otherwise, for AB-join, set this
+        Set to `True` if this is a self-join. Otherwise, for an AB-join, set this
         to `False`.
 
     Returns
@@ -3752,7 +3751,7 @@ def check_ignore_trivial(T_A, T_B, ignore_trivial):
 
     Notes
     -----
-    These warnings may be supressed by using a context manager
+    These warnings may be suppressed by using a context manager
     ```
     import stumpy
     import numpy as np
@@ -4509,3 +4508,40 @@ def _update_incremental_PI(D, P, I, excl_zone, n_appended=0):
             _shift_insert_at_index(I[-1], idx, i + n_appended)
 
     return
+
+
+def check_self_join(ignore_trivial):
+    """
+    A simple function to check whether `ignore_trivial` is `True` for a self-join
+
+    Otherwise, warn the user.
+
+    Parameters
+    ----------
+    ignore_trivial : bool
+        Set to True if this is a self-join. Otherwise, for AB-join, set this to False.
+
+    Returns
+    -------
+    None
+
+    Notes
+    -----
+    These warnings may be suppressed by using a context manager
+    ```
+    import stumpy
+    import numpy as np
+    import warnings
+
+    T = np.random.rand(10_000)
+    m = 50
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", message="`ignore_trivial` cannot be `False`")
+        for _ in range(5):
+            stumpy.stump(T, m, ignore_trivial=False)
+    ```
+    """
+    if ignore_trivial is False:
+        msg = "`ignore_trivial` cannot be `False` for a self-join and "
+        msg += "has been automatically overridden and set to `True`."
+        warnings.warn(msg)
