@@ -7,10 +7,10 @@ STUMPY documentation
    :caption: Contents:
 
    background
-   install
+   Install <install>
    api
    tutorials
-   Contribute.ipynb
+   Contribute <Contribute.ipynb>
    help
 
 .. include:: ../README.rst
