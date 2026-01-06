@@ -54,7 +54,7 @@ check_errs()
 check_black()
 {
     echo "Checking Black Code Formatting"
-    black --check --exclude=".*\.ipynb" --extend-exclude=".venv" --extend-exclude=".pixi" --diff ./
+    black --check --exclude=".*\.ipynb" --extend-exclude=".venv|.pixi" --diff ./
     check_errs $?
 }
 
@@ -75,7 +75,7 @@ check_docstrings()
 check_flake()
 {
     echo "Checking Flake8 Style Guide Enforcement"
-    flake8 --extend-exclude=.venv --extend-exclude=.pixi ./
+    flake8 --extend-exclude=.venv/,.pixi/ ./
     check_errs $?
 }
 
