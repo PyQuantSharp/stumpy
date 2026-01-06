@@ -47,13 +47,15 @@ conda:
 
 .. code:: bash
 
-    conda install -c conda-forge -y numpy scipy numba
+    conda install -c conda-forge -y --file requirements.txt
+    python -m pip install .
 
 pip:
 
 .. code:: bash
 
     python -m pip install -r requirements.txt
+    python -m pip install .
 
 pixi:
 
@@ -66,9 +68,3 @@ uv:
 .. code:: bash
 
     uv sync
-
-Once the dependencies are installed (stay inside of the ``stumpy`` directory), execute:
-
-.. code:: bash
-
-    python -m pip install .
