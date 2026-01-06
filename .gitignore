@@ -7,7 +7,7 @@
 .pytest_cache
 LOG*
 PID
-.coverage*
+.coverage
 coverage.json
 coverage.stumpy.json
 dask-worker-space
