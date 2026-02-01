@@ -504,15 +504,26 @@ if __name__ == "__main__":
         default="min",
         help='Options: ["min", "max", "range", "safe", "latest"]',
     )
+    parser.add_argument(
+        "-pkg",
+        type=str,
+        default=None,
+        help='Name of any Python package in PyPI'
+    )
     parser.add_argument("python_version", nargs="*", default=None)
     args = parser.parse_args()
     # Example
     # ./versions.py
-    # ./versions.py 3.11
+    # ./versions.py -pkg ray
+    # ./versions.py -mode min
     # ./versions.py -mode max
+    # ./versions.py -mode safe
+    # ./versions.py -mode latest
     # /versions.py -mode range 3.10 3.14
 
-    if args.mode == "min":
+    if args.pkg:
+        print(get_latest_pkg_python_version(args.pkg))
+    elif args.mode == "min":
         if len(args.python_version) == 0:
             args.python_version = None
         elif len(args.python_version) == 1:
