@@ -241,15 +241,23 @@ def get_latest_scipy_python_version():
     """
     Retrieve the latest Python version that is supported by SciPy
     """
+    python_version = get_latest_pkg_python_version("scipy")
+    return f"<={python_version}"
+
+
+def get_latest_pkg_python_version(pkg):
+    """
+    Retrieve the latest Python version that is supported by <pkg>
+    """
     python_versions = []
-    response = _get_pypi_json("scipy")
+    response = _get_pypi_json(pkg)
     for classifier in response.get("info").get("classifiers"):
         if "Python" in classifier:
             match = re.search(r"Python\s+\:\:\s+(\d+\.\d+)", classifier)
             if match is not None:
                 python_versions.append(match.groups()[0])
     python_version = sorted(python_versions, key=Version)[-1]
-    return f"<={python_version}"
+    return python_version
 
 
 def _get_pypi_json(pkg):
