@@ -505,10 +505,7 @@ if __name__ == "__main__":
         help='Options: ["min", "max", "range", "safe", "latest"]',
     )
     parser.add_argument(
-        "-pkg",
-        type=str,
-        default=None,
-        help='Name of any Python package in PyPI'
+        "-pkg", type=str, default=None, help="Name of any Python package in PyPI"
     )
     parser.add_argument("python_version", nargs="*", default=None)
     args = parser.parse_args()
