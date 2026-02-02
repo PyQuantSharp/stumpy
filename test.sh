@@ -6,6 +6,7 @@ custom_testfiles=()
 max_iter=10
 site_pkgs=$(python -c 'import site; print(site.getsitepackages()[0])')
 # Parse command line arguments
+fcoveragerc=""
 for var in "$@"
 do
     if [[ $var == "unit" ]]; then
@@ -138,29 +139,36 @@ check_ray()
     fi
 }
 
+gen_coveragerc_boilerplate()
+{
+    # Check if file does not exist OR file is empty
+    if [[ ! -e "$FILE" ]] || [[ ! -s "$FILE" ]]; then
+        echo "[report]" > .coveragerc_override
+        echo "; Regexes for lines to exclude from consideration" >> .coveragerc_override
+        echo "exclude_also =" >> .coveragerc_override
+    fi
+}
+
 gen_ray_coveragerc()
 {
     # Generate a .coveragerc_ray file that excludes Ray functions and tests
-    echo "[report]" > .coveragerc_ray
-    echo "; Regexes for lines to exclude from consideration" >> .coveragerc_ray
-    echo "exclude_also =" >> .coveragerc_ray
-    echo "    def .*_ray_*" >> .coveragerc_ray
-    echo "    def ,*_ray\(*" >> .coveragerc_ray
-    echo "    def ray_.*" >> .coveragerc_ray
-    echo "    def test_.*_ray*" >> .coveragerc_ray
+    gen_coveragerc_boilerplate
+    echo "    def .*_ray_*" >> .coveragerc_override
+    echo "    def ,*_ray\(*" >> .coveragerc_override
+    echo "    def ray_.*" >> .coveragerc_override
+    echo "    def test_.*_ray*" >> .coveragerc_override
 }
 
 set_ray_coveragerc()
 {
-    # If `ray` command is not found then generate a .coveragerc_ray file
+    # If `ray` command is not found then generate a .coveragerc_override file
     if ! command -v ray &> /dev/null
     then
         echo "Ray Not Installed"
         gen_ray_coveragerc
-        fcoveragerc="--rcfile=.coveragerc_ray"
+        fcoveragerc="--rcfile=.coveragerc_override"
     else
         echo "Ray Installed"
-        fcoveragerc=""
     fi
 }
 
@@ -318,7 +326,7 @@ clean_up()
     rm -rf "tests/__pycache__/"
     rm -rf build dist stumpy.egg-info __pycache__
     rm -f docs/*.nbconvert.ipynb
-    rm -rf ".coveragerc_ray"
+    rm -rf ".coveragerc_override"
     if [ -d "$site_pkgs/stumpy/__pycache__" ]; then
         rm -rf $site_pkgs/stumpy/__pycache__/*nb*
     fi
