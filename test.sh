@@ -151,7 +151,7 @@ gen_coveragerc_boilerplate()
 
 gen_ray_coveragerc()
 {
-    # Generate a .coveragerc_ray file that excludes Ray functions and tests
+    # Generate a .coveragerc_override file that excludes Ray functions and tests
     gen_coveragerc_boilerplate
     echo "    def .*_ray_*" >> .coveragerc_override
     echo "    def ,*_ray\(*" >> .coveragerc_override
