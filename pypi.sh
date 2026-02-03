@@ -3,15 +3,11 @@
 # 1. Update version number in pyproject.toml
 # 2. Update CHANGELOG
 # 3. Update README with new features/functions/tutorials
-# 4. Determine minimum versions and dependencies with ./min.py
-# 5. Bump minimum versions and dependencies
-#    a) pyproject.toml
-#    b) requirements.txt
-#    c) environment.yml
-#    d) .github/worflows/github-actions.yml
-#    e) recipes/meta.yaml in conda-feedstock
-#    f) README.rst
-# 6. Commit all above changes as the latest version number and push
+# 4. Determine minimum versions and dependencies:
+#    a) Run: `./versions.py -mode min`
+#    b) Fix/bump all minimum versions and dependencies identified
+# 5. Commit all above changes as the latest version number (e.g. v1.15.0)
+# 6. Push the commit to `main`
 #
 # For conda-forge
 # 1. Fork the stumpy-feedstock: https://github.com/conda-forge/stumpy-feedstock
@@ -29,12 +25,6 @@
 #
 # For readthedocs
 # 1. Update the docs/api.rst to include new features/functions
-#
-# For socializing
-# 1. Post on Twitter
-# 2. Post on LinkedIn
-# 3. Post on Reddit
-# 4. Post new tutorials on Medium
 #
 # To check that the distribution is valid, execute:
 # twine check dist/* 
