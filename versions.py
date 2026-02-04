@@ -484,12 +484,24 @@ def get_all_min_versions(MIN_PYTHON):
         "README.rst",
     ]
 
+    with open("pyproject.toml", "r") as f:
+        pyproject_lines = f.readlines()
+
     test_pkg_mismatch_regex()
 
     for pkg_name, pkg_version in pkgs.items():
         for name, version, fname, line_num in find_pkg_mismatches(
             pkg_name, pkg_version, fnames
         ):
+            if fname == "pyproject.toml":
+                line = pyproject_lines[line_num - 1]
+                if "Programming Language :: Python" in line and Version(
+                    pkg_version
+                ) <= Version(version):
+                    # Skip lines in `pyproject.toml` where the "Programming Language"
+                    # version may be higher than the minimum Python version
+                    continue
+
             print(
                 f"{pkg_name} {pkg_version} Mismatch: Version {version} "
                 f"found in {fname}:{line_num}"

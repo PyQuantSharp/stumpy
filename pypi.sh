@@ -6,6 +6,7 @@
 # 4. Determine minimum versions and dependencies:
 #    a) Run: `./versions.py -mode min`
 #    b) Fix/bump all minimum versions and dependencies identified
+#    c) Fix/bump the maximum "Programming Language" version in `pyproject.toml`
 # 5. Commit all above changes as the latest version number (e.g. v1.15.0)
 # 6. Push the commit to `main`
 #

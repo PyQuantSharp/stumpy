@@ -15,22 +15,27 @@ classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Science/Research",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: BSD License",
-    "Programming Language :: Python",
     "Topic :: Software Development",
     "Topic :: Scientific/Engineering",
     "Operating System :: Microsoft :: Windows",
     "Operating System :: POSIX",
     "Operating System :: Unix",
     "Operating System :: MacOS",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
 ]
 keywords = ["time series", "matrix profile", "motif", "discord"]
 maintainers = [
     {name = "Sean M. Law", email = "seanmylaw@gmail.com"},
     {name = "Nima Sarajpoor", email = "nimasarajpoor@gmail.com"}
 ]
-license = {text = "3-clause BSD License"}
+license = "BSD-3-Clause"
+license-files = ["LICENSE.txt"]
 dependencies = [
     "numpy >= 1.24",
     "scipy >= 1.10",
@@ -39,7 +44,6 @@ dependencies = [
 
 [tool.setuptools]
 packages = ["stumpy"]
-license-files = ["LICENSE.txt"]
 
 [project.optional-dependencies]
 ci = [
@@ -99,6 +103,9 @@ numpydoc = "*"
 myst-nb = "*"
 jupyterlab-myst = "*"
 sphinx-togglebutton = "*"
+# release
+twine = "*"
+python-build = "*"  # Equivalent to PyPI `build` package
 
 [tool.pixi.activation]
 # Always execute ./setup.sh when activating the default environment
