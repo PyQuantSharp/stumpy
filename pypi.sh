@@ -60,10 +60,10 @@ upload_test_pypi()
     # Upload to Test PyPi
     if ! [ -f $HOME/.pypirc ]; then
         # .pypirc file does not exist, prompt for API token
-        twine upload --verbose --repository-url https://test.pypi.org/legacy/ dist/*
+        twine upload --verbose --repository-url https://test.pypi.org/legacy/ dist/* || echo 'Twine Test Upload Failed: Try temporarily incrementing the minor version number if you are getting a "400 File already exists"'
     else
         # Get API token from .pypirc file
-        twine upload --verbose -r testpypi dist/*
+        twine upload --verbose -r testpypi dist/* || echo 'Twine Test Upload Failed: Try temporarily incrementing the minor version number if you are getting a "400 File already exists"'
     fi
 }
 
