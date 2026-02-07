@@ -661,10 +661,7 @@ class floss:
             self._Σ_T[:-1] = self._Σ_T[1:]
 
             M_T, Σ_T = core.compute_mean_std(self._T[-self._m :], self._m)
-            try:
-                self._M_T[-1], self._Σ_T[-1] = M_T, Σ_T
-            except ValueError:  # pragma: no cover
-                self._M_T[-1], self._Σ_T[-1] = M_T.item(), Σ_T.item()
+            self._M_T[-1], self._Σ_T[-1] = M_T.item(), Σ_T.item()
 
             D = core.mass(
                 self._finite_Q,

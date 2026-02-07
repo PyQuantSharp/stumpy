@@ -1209,10 +1209,7 @@ def test_merge_topk_PI_without_overlap():
         col_idx = np.random.randint(0, k, size=n)
         for i in range(n):  # creating ties between values of PA and PB
             val = np.random.choice(PA[i], size=1, replace=False)
-            try:
-                PB[i, col_idx[i]] = val
-            except ValueError:  # pragma: no cover
-                PB[i, col_idx[i]] = val.item()
+            PB[i, col_idx[i]] = val.item()
         PB[:, :] = np.sort(PB, axis=1)  # sorting each row separately
 
         IA = np.arange(n * k).reshape(n, k)
@@ -1337,10 +1334,7 @@ def test_merge_topk_ρI_without_overlap():
         col_idx = np.random.randint(0, k, size=n)
         for i in range(n):  # creating ties between values of PA and PB
             val = np.random.choice(ρA[i], size=1, replace=False)
-            try:
-                ρB[i, col_idx[i]] = val
-            except ValueError:  # pragma: no cover
-                ρB[i, col_idx[i]] = val.item()
+            ρB[i, col_idx[i]] = val.item()
         ρB[:, :] = np.sort(ρB, axis=1)  # sorting each row separately
 
         IA = np.arange(n * k).reshape(n, k)
