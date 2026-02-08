@@ -55,6 +55,11 @@
 #  Functions  #
 ###############
 
+local_test()
+{
+    twine check dist/*
+}
+
 upload_test_pypi()
 {
     # Upload to Test PyPi
@@ -106,6 +111,7 @@ upload_pypi()
 
 rm -rf dist
 python3 -m build --sdist --wheel
-upload_test_pypi
+local_test
+# upload_test_pypi
 # upload_pypi
 rm -rf build dist stumpy.egg-info
