@@ -1,3 +1,19 @@
+# 2026-02-07    [ 1.14.1 ]:
+---------------------------
+* bugfixes
+  - Fixed/replaced functions deprecated in `numpy >= 2.4`
+* features
+  - Added support for `numpy >= 2.4`
+  - Added support for `numba >= 0.64.0`
+* tasks
+  - Added function to `pypi.sh` to check build locally
+  - Added twine upload comment
+  - Updated `pyproject.toml` to comply with `python -m build`
+* documentation
+  - Fixed typo
+  - Updated docs
+
+
 # 2026-02-03    [ 1.14.0 ]:
 ---------------------------
 * bugfixes
