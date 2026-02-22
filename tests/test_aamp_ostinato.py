@@ -17,7 +17,7 @@ def dask_cluster():
         worker_dashboard_address=None,
     )
     yield cluster.scheduler_address
-    cluster.close()
+    cluster.close(timeout=60)
 
 
 @pytest.mark.parametrize(
