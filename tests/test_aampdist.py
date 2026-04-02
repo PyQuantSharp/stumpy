@@ -20,7 +20,7 @@ def dask_cluster():
     try:
         cluster.close(timeout=60)
     except tornado.ioloop.TimeoutError:  # pragma: no cover
-        cluster.shutdown()
+        pass
 
 
 test_data = [
