@@ -30,6 +30,7 @@ def get_all_python_versions():
             storage_options=HEADERS,
         )[0]
         .query('Branch != "main"')
+        .dropna()
         .Branch.to_list()
     )
     return python_versions
