@@ -90,7 +90,6 @@ isort = ">=5.11.0"
 polars = ">=1.14.0"
 pip = "*"
 lxml = "*"
-numba-cuda = "*"
 # readthedocs
 sphinx = ">=3.5.3"
 pydata-sphinx-theme = "*"
