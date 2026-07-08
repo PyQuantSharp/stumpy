@@ -14,7 +14,7 @@ jobs:
           fi
       - name: Close PR and Leave Comment
         if: steps.check.outputs.template_removed == 'true'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             // Leave an explanatory comment
