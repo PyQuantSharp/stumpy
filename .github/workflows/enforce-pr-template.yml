@@ -9,7 +9,7 @@ jobs:
       - name: Check PR Body for Template Keywords
         id: check
         run: |
-          if [[ ! "${{ github.event.pull_request.body }}" =~ "# Pull Request Checklist" ]]; then
+          if [[ ! grep -q "# Pull Request Checklist" <<< "${{ github.event.pull_request.body }}" ]]; then
             echo "template_removed=true" >> $GITHUB_OUTPUT
           fi
       - name: Close PR and Leave Comment
