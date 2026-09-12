@@ -6,7 +6,7 @@ import types
 from importlib.metadata import distribution
 from site import getsitepackages
 
-from numba import cuda
+from numba.cuda import is_available as cuda_is_available
 
 from . import cache, config
 
@@ -84,7 +84,7 @@ for module_name, func_name in njit_funcs:
     key = "STUMPY_FASTMATH_" + key.upper()  # e.g., STUMPY_FASTHMATH_CORE._MASS
     config._STUMPY_DEFAULTS[key] = _get_fastmath_value(module_name, func_name)
 
-if cuda.is_available():
+if cuda_is_available():
     _lazy_imports.update(
         {
             "gpu_aamp": "gpu_aamp",
